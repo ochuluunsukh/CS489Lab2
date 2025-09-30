@@ -1,30 +1,42 @@
 package edu.miu.cs.cs489.odkoo;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 import edu.miu.cs.cs489.odkoo.model.Employee;
 import edu.miu.cs.cs489.odkoo.model.PensionPlan;
 
+import java.lang.reflect.Type;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
     public static void main(String[] args) {
         List<Employee> employees = loadData();
+    // Sort all employees: by yearly salary (desc) then by last name (asc)
+    employees.sort(Comparator.comparing(Employee::getYearlySalary, Comparator.reverseOrder())
+        .thenComparing(Employee::getLastName));
 
-        // Sort all employees: by last name (asc), then by yearly salary (desc)
-        employees.sort(Comparator.comparing(Employee::getLastName)
-                .thenComparing(Employee::getYearlySalary, Comparator.reverseOrder()));
+    // Filter for upcoming enrollees and sort by employment date (desc)
+    List<Employee> upcomingEnrollees = employees.stream()
+        .filter(Employee::isUpcomingEnrollee)
+        .sorted(Comparator.comparing(Employee::getEmploymentDate).reversed())
+        .toList();
 
-        // Filter for upcoming enrollees and sort by employment date (asc)
-        List<Employee> upcomingEnrollees = employees.stream()
-                .filter(Employee::isUpcomingEnrollee)
-                .sorted(Comparator.comparing(Employee::getEmploymentDate))
-                .toList();
-
-        // Print results in JSON format
-        printReport(employees, upcomingEnrollees);
+    // Print results in JSON format
+    printReportAsJson(employees, upcomingEnrollees);
     }
 
     private static List<Employee> loadData() {
@@ -55,12 +67,38 @@ public class Main {
         return employees;
     }
 
-    private static void printReport(List<Employee> allEmployees, List<Employee> upcomingEnrollees) {
-        System.out.println("--- List of All Employees ---");
-        allEmployees.stream()
-                .forEach(System.out::println);
-        System.out.println("\n--- Quarterly Upcoming Enrollees Report ---");
-        upcomingEnrollees.stream()
-                .forEach(System.out::println);
+    private static Gson buildGson() {
+        DateTimeFormatter fmt = DateTimeFormatter.ISO_LOCAL_DATE;
+        GsonBuilder builder = new GsonBuilder().setPrettyPrinting();
+        // LocalDate serializer/deserializer
+        builder.registerTypeAdapter(LocalDate.class, new JsonSerializer<LocalDate>() {
+            @Override
+            public JsonElement serialize(LocalDate src, Type typeOfSrc, JsonSerializationContext context) {
+                return new JsonPrimitive(src.format(fmt));
+            }
+        });
+        builder.registerTypeAdapter(LocalDate.class, new JsonDeserializer<LocalDate>() {
+            @Override
+            public LocalDate deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
+                return LocalDate.parse(json.getAsString(), fmt);
+            }
+        });
+        return builder.create();
+    }
+
+    private static void printReportAsJson(List<Employee> allEmployees, List<Employee> upcomingEnrollees) {
+        Gson gson = buildGson();
+
+        Map<String, Object> output = new HashMap<>();
+        output.put("allEmployees", allEmployees);
+        output.put("upcomingEnrollees", upcomingEnrollees);
+
+        // Print all employees JSON
+        System.out.println("--- List of All Employees (JSON) ---");
+        System.out.println(gson.toJson(allEmployees));
+
+        // Print quarterly upcoming enrollees JSON
+        System.out.println("\n--- Quarterly Upcoming Enrollees Report (JSON) ---");
+        System.out.println(gson.toJson(upcomingEnrollees));
     }
 }
