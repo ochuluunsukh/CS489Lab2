@@ -52,4 +52,17 @@ public class Employee {
 
         return !threeYearsAfterEmployment.isBefore(nextQuarterStart) && !threeYearsAfterEmployment.isAfter(nextQuarterEnd);
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Employee{");
+        sb.append("employeeId=").append(employeeId);
+        sb.append(", firstName='").append(firstName).append('\'');
+        sb.append(", lastName='").append(lastName).append('\'');
+        sb.append(", employmentDate=").append(employmentDate);
+        sb.append(", yearlySalary=").append(yearlySalary);
+        sb.append(", pensionPlan=").append(pensionPlan);
+        sb.append('}');
+        return sb.toString();
+    }
 }

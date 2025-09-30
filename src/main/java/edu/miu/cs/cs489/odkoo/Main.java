@@ -1,10 +1,6 @@
 package edu.miu.cs.cs489.odkoo;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import edu.miu.cs.cs489.odkoo.model.Employee;
 import edu.miu.cs.cs489.odkoo.model.PensionPlan;
-import edu.miu.cs.cs489.odkoo.utils.LocalDateAdapter;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -60,14 +56,11 @@ public class Main {
     }
 
     private static void printReport(List<Employee> allEmployees, List<Employee> upcomingEnrollees) {
-        Gson gson = new GsonBuilder()
-                .setPrettyPrinting()
-                .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
-                .create();
-
         System.out.println("--- List of All Employees ---");
-        System.out.println(gson.toJson(allEmployees));
+        allEmployees.stream()
+                .forEach(System.out::println);
         System.out.println("\n--- Quarterly Upcoming Enrollees Report ---");
-        System.out.println(gson.toJson(upcomingEnrollees));
+        upcomingEnrollees.stream()
+                .forEach(System.out::println);
     }
 }

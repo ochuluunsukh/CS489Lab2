@@ -17,4 +17,14 @@ public class PensionPlan {
     public String getPlanReferenceNumber() { return planReferenceNumber; }
     public LocalDate getEnrollmentDate() { return enrollmentDate; }
     public double getMonthlyContribution() { return monthlyContribution; }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("PensionPlan{");
+        sb.append("planReferenceNumber='").append(planReferenceNumber).append('\'');
+        sb.append(", enrollmentDate=").append(enrollmentDate);
+        sb.append(", monthlyContribution=").append(monthlyContribution);
+        sb.append('}');
+        return sb.toString();
+    }
 }
